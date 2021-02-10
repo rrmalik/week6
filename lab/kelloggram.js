@@ -5,41 +5,89 @@ window.addEventListener('DOMContentLoaded', async function(event) {
   // post data to Firestore. For best results, use square images
   // from Unsplash, e.g. https://unsplash.com/s/photos/tacos?orientation=squarish
   // Right-click and "copy image address"
+
   // - Begin by using .querySelector to select the form
   //   element, add an event listener to the 'submit' event,
   //   and preventing the default behavior.
+  document.querySelector('form').addEventListener('submit', async function(event) {
+    event.preventDefault()
+    console.log('clicked submit!')
+
+  let userName = document.querySelector('#username').value
+    console.log(userName)
+  
+  let imageURL = document.querySelector('#image-url').value
+    console.log(imageURL)
+
+    if (userName.length > 0) {
+      let docRef = await db.collection('posts').add({
+        username: userName,
+        imageURL: imageURL,
+        likes: 0
+      })
+    }
+  })
+
   // - Using the "db" variable, talk to Firestore. When the form is
   //   submitted, send the data entered to Firestore by using 
   //   db.collection('posts').add(). Along withthe username and image 
   //   URL, add a "likes" field and set it to 0; we'll use this later.
   // - Verify (in Firebase) that records are being added.
-  
+
   // Step 2: Read existing posts from Firestore and display them
   // when the page is loaded
   // - Read data using db.collection('posts').get()
+
+  let querySnapshot = await db.collection('posts').get()
+  console.log(`Number of posts in collection: ${querySnapshot.size}`)
+
   // - Loop through the returned data and set four variables 
   //   inside the loop – the post ID, the post data, the post
   //   username, and the post image URL
-  // - Inside the loop, using insertAdjacentHTML, add posts
-  //   to the page inside the provided "posts" div; sample code
-  //   provided:
-  //
-  //   document.querySelector('.posts').insertAdjacentHTML('beforeend', `
-  //     <div class="md:mt-16 mt-8 space-y-8">
-  //       <div class="md:mx-0 mx-4">
-  //         <span class="font-bold text-xl">${postUsername}</span>
-  //       </div>
-  //
-  //       <div>
-  //         <img src="${postImageUrl}" class="w-full">
-  //       </div>
-  //  
-  //       <div class="text-3xl md:mx-0 mx-4">
-  //         <button class="like-button">❤️</button>
-  //         <span class="likes">0</span>
-  //       </div>
-  //     </div>
-  //   `)
+
+  let posts = querySnapshot.docs
+  for (let i=0; i<posts.length; i++) {
+    let postId = posts[i].id
+    // console.log(postId)
+    let postData = posts[i].data()
+    // console.log(postData)
+    let postUserName = postData.username
+    // console.log(postUserName)
+    let postImageURL = postData.imageURL
+    // console.log(postImageURL)
+    let postLikes = postData.likes
+    // console.log(likes)
+  
+   document.querySelector('.posts').insertAdjacentHTML('beforeend', `
+      <div id="post-${postId}" class="md:mt-16 mt-8 space-y-8">
+        <div class="md:mx-0 mx-4">
+          <span class="font-bold text-xl">${postUserName}</span>
+        </div>
+  
+        <div>
+          <img src="${postImageURL}" class="w-full">
+        </div>
+   
+        <div class="text-3xl md:mx-0 mx-4">
+          <button class="like-button">❤️</button>
+          <span class="likes">${postLikes}</span>
+        </div>
+      </div>
+    `)
+
+    let likeButton = document.querySelector(`#post-${postId} .like-button`)
+    likeButton.addEventListener('click', function(event) {
+    event.preventDefault()
+    // console.log(`I clicked post-${postId} button!`)
+    let likesElement = document.querySelector(`#post-${postId} .likes`)
+    let likesCount = likesElement.innerHTML
+    console.log(likesCount)
+    let newNumberOfLikes = parseInt(likesCount) + 1
+    console.log(newNumberOfLikes)
+    likesElement.innerHTML = newNumberOfLikes
+    })
+  }
+ 
   
   // Step 3: Implement the "like" button
   // - In the code we wrote for Step 2, attach an event listener to
