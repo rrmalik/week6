@@ -17,13 +17,15 @@ window.addEventListener('DOMContentLoaded', async function(event) {
     console.log(userName)
   
   let imageURL = document.querySelector('#image-url').value
-    console.log(imageURL)
+    console.log(imageURL) 
+    console.log(firebase.firestore.FieldValue.serverTimestamp())
 
     if (userName.length > 0) {
       let docRef = await db.collection('posts').add({
         username: userName,
         imageURL: imageURL,
-        likes: 0
+        likes: 0,
+        created: firebase.firestore.FieldValue.serverTimestamp()
       })
     }
   })
@@ -57,7 +59,9 @@ window.addEventListener('DOMContentLoaded', async function(event) {
     // console.log(postImageURL)
     let postLikes = postData.likes
     // console.log(likes)
-  
+    // let postCreatedAt = postData.created
+    // console.log(created)
+
    document.querySelector('.posts').insertAdjacentHTML('beforeend', `
       <div id="post-${postId}" class="md:mt-16 mt-8 space-y-8">
         <div class="md:mx-0 mx-4">
@@ -78,7 +82,8 @@ window.addEventListener('DOMContentLoaded', async function(event) {
     let likeButton = document.querySelector(`#post-${postId} .like-button`)
     likeButton.addEventListener('click', function(event) {
     event.preventDefault()
-    // console.log(`I clicked post-${postId} button!`)
+    console.log(likeButton)
+    console.log(`I clicked post-${postId} button!`)
     let likesElement = document.querySelector(`#post-${postId} .likes`)
     let likesCount = likesElement.innerHTML
     console.log(likesCount)
